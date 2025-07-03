@@ -27,7 +27,8 @@
         - ad_configure
   tags:
     - always
-
+# if the verification fail, you need to check if the ad_test_user exists and resolv via sssd. 
+# optionaly you can comment out the verification.
 - name: Include domain join tasks
   ansible.builtin.include_tasks:
     file: verify.yml
