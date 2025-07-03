@@ -37,6 +37,9 @@ roles/
     │   ├── sssd.conf.j2
     │   ├── krb5.conf.j2
     │   └── sudoers.ad.j2
+    ├── files/
+    │   ├── nsswitch.conf
+    │   └── pam.sss
     └── handlers/main.yml         # Restart sssd if config changes
 ```
 
