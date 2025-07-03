@@ -21,7 +21,7 @@
 
 - name: Verify domain user via SSSD
   ansible.builtin.command:
-    cmd: id {{ ad_test_user }}
+    cmd: id {{ ad_test_user }}}@{{ ad_dc_fqdn }}
   register: id_test
   changed_when: false
   failed_when: id_test.rc != 0
