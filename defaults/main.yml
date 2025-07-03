@@ -36,5 +36,9 @@ sssd_packages:
   - python3-pexpect
   - authselect
 
+# Verifies LDAPS connectivity to your AD domain controller (ad_dc_fqdn)
 ad_dc_fqdn: "your_local_domain"
-ad_test_user: "your_user_whith_join_rights"
+
+# Validates that the one test user can be resolved via SSSD
+# if you dont want to test, comment out this variable and remove the verification from /tasks/main.yml
+ad_test_user: "ad_test_user"
