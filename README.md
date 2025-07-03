@@ -1,4 +1,4 @@
-# ansible-role-rhel-ad-join
+# ansible-rhel-sssd-join
 Ansible role to join RHEL-based Linux systems to an Active Directory domain.
 This role uses realm, sssd, and Kerberos to automate domain joining for RHEL-compatible systems such as Rocky Linux and AlmaLinux.
 
@@ -80,7 +80,7 @@ krb5_libdefaults: []
   hosts: linux_clients
   become: true
   roles:
-    - ansible-role-rhel-ad-join
+    - ansible-rhel-sssd-join
 ```
 
 ---
