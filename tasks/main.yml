@@ -1,0 +1,38 @@
+#SPDX-License-Identifier: MIT-0
+---
+# domain join
+- name: Include domain join tasks
+  ansible.builtin.include_tasks:
+    file: ad_prepare.yml
+    apply:
+      tags:
+        - ad_prepare
+  tags:
+    - always
+
+- name: Include domain join tasks
+  ansible.builtin.include_tasks:
+    file: ad_join.yml
+    apply:
+      tags:
+        - ad_join
+  tags:
+    - always
+
+- name: Include domain join tasks
+  ansible.builtin.include_tasks:
+    file: ad_configure.yml
+    apply:
+      tags:
+        - ad_configure
+  tags:
+    - always
+
+- name: Include domain join tasks
+  ansible.builtin.include_tasks:
+    file: verify.yml
+    apply:
+      tags:
+        - ad_verify
+  tags:
+    - always

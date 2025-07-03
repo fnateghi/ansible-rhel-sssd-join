@@ -1,0 +1,69 @@
+---
+# roles/ad_domain_join/tasks/ad_configure.yml
+
+- name: Deploy /etc/krb5.conf
+  ansible.builtin.template:
+    src: krb5.conf.j2
+    dest: /etc/krb5.conf
+    mode: "0644"
+  become: true
+
+# deploy the sssd.conf for default or kvai specific
+- name: Deploy conditional sssd.conf
+  ansible.builtin.template:
+    src: "{{ kvai | default(false) | bool | ternary('sssd_kvai.conf.j2', 'sssd.conf.j2') }}"
+    dest: /etc/sssd/sssd.conf
+    owner: root
+    group: root
+    mode: "0600"
+  notify: restart sssd
+  become: true
+
+- name: Deploy /etc/nsswitch.conf
+  ansible.builtin.copy:
+    src: nsswitch.conf
+    dest: /etc/nsswitch.conf
+    mode: "0644"
+  become: true
+
+# Enable the 'sssd' profile with automatic home directory creation
+- name: Enable 'sssd with-mkhomedir' profile
+  ansible.builtin.command: authselect select sssd with-mkhomedir --force
+  register: authselect_select
+  changed_when: >-
+    'Profile was modified' in authselect_select.stdout or
+    'with-mkhomedir' not in authselect_select.stdout
+
+# Check current authselect status
+- name: Get current authselect profile
+  ansible.builtin.command: authselect current
+  register: authselect_status
+  changed_when: false
+  become: true
+
+# Assert that 'with-mkhomedir' is enabled in the current profile
+- name: Assert that 'with-mkhomedir' is active
+  ansible.builtin.assert:
+    that:
+      - "'with-mkhomedir' in authselect_status.stdout"
+    fail_msg: "'with-mkhomedir' is not enabled in the current authselect profile. AD users may not get home directories."
+    success_msg: "'with-mkhomedir' is enabled as expected."
+
+- name: Deploy sudoers config (KVAI or default)
+  ansible.builtin.template:
+    src: "{{ kvai | default(false) | bool | ternary('sudoers.ad.kvai.j2', 'sudoers.ad.j2') }}"
+    dest: /etc/sudoers.d/ad-sudoers
+    owner: root
+    group: root
+    mode: '0440'
+  become: true
+
+- name: Verify joined realm
+  ansible.builtin.command: realm list
+  register: joined_realm
+  become: true
+  changed_when: false
+
+- name: Debug realm info
+  ansible.builtin.debug:
+    var: joined_realm.stdout_lines

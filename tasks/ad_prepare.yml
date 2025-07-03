@@ -1,0 +1,54 @@
+---
+# roles/ad_domain_join/tasks/ad_prepare.yml
+
+- name: Stop SSSD if running
+  ansible.builtin.systemd:
+    name: sssd
+    state: stopped
+  become: true
+  failed_when: false
+
+- name: Remove /etc/sssd/conf with command (fallback)
+  ansible.builtin.command:
+    cmd: rm /etc/sssd/sssd.conf
+  become: true
+  failed_when: false
+  changed_when: false
+
+- name: Remove stale sssd.conf to force rejoin
+  ansible.builtin.file:
+    path: /etc/sssd/sssd.conf
+    state: absent
+  become: true
+  when: sssd_force_rejoin
+
+- name: Remove stale keytab to force rejoin
+  ansible.builtin.file:
+    path: /etc/krb5.keytab
+    state: absent
+  become: true
+  when: sssd_force_rejoin
+
+- name: Install required packages on Rocky 9
+  ansible.builtin.package:
+    name: "{{ sssd_packages }}"
+    state: present
+  become: true
+  when: ansible_distribution_major_version == '9'
+
+- name: Install required packages on Rocky 8 (fallback with command)
+  ansible.builtin.command: "dnf install -y {{ sssd_packages | join(' ') }}"
+  register: dnf_install
+  changed_when: "'Nothing to do.' not in dnf_install.stdout"
+  become: true
+  when: ansible_distribution_major_version == '8'
+
+- name: Install python3.12-pip via dnf
+  ansible.builtin.command: "sudo dnf install python3.12-pip -y"
+  when: install_pexpect | default(false) | bool
+  changed_when: false
+
+- name: Install pexpect via pip3.12
+  ansible.builtin.command: "sudo pip3.12 install pexpect"
+  when: install_pexpect | default(false) | bool
+  changed_when: false

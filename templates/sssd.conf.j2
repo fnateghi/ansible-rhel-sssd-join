@@ -1,0 +1,44 @@
+## templates/sssd.conf.j2
+{{ ansible_managed | comment(decoration='# ') }}
+[sssd]
+debug_level = {{ sssd.debuglevel }}
+config_file_version = 2
+services = nss, pam, ssh
+domains = {{ sssd.domain | upper | default('YOUR_LOCAL_DOMAIN') }}
+
+[pam]
+offline_credentials_expiration = {{ [ sssd.offline_credentials_expiration | int, sssd.account_cache_expiration | int ] | min }}
+
+[domain/{{ sssd.domain | upper | default('YOUR_LOCAL_DOMAIN') }}]
+id_provider = ad
+access_provider = simple
+
+# Allow these groups to log in (both admins and operators)
+{% set admins = sssd.groups_admins | default([]) %}
+{% set operators = sssd.groups_operators | default([]) %}
+{% set all_groups = (admins + operators) | reject('equalto', '') | list %}
+{% if all_groups %}
+simple_allow_groups = {{ all_groups | join(',') }}
+{% endif %}
+
+# SSH public key from AD. Optionaly you can allow you users to login only with pubkey which you place it in you ad Attribute altSecurityIdentities. 
+# this require some additional settings your sshd config. if no either remove this part or leave it untuched.
+{% if sssd_pubkey_allow %}
+ldap_user_ssh_public_key = altSecurityIdentities
+{% else %}
+# ldap_user_ssh_public_key is disabled
+{% endif %}
+
+# Identity and caching
+ldap_id_mapping = true
+cache_credentials = {{ sssd.cache_credentials | default('true') }}
+account_cache_expiration = {{ sssd.account_cache_expiration }}
+entry_cache_timeout = {{ sssd.entry_cache_timeout }}
+
+# Misc
+case_sensitive = false
+ad_gpo_access_control = disabled
+fallback_homedir = /home/%u
+override_homedir = /home/%u
+default_shell = /bin/bash
+skel_dir = /etc/skel

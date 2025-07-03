@@ -1,0 +1,33 @@
+---
+# roles/ad_domain_join/tasks/ad_join.yml
+
+- name: List if realm is joined
+  ansible.builtin.command: realm list --name-only
+  register: realm_list
+  changed_when: false
+  failed_when: false
+  become: true
+
+- name: Set rejoin_required fact
+  ansible.builtin.set_fact:
+    rejoin_required: "{{ sssd.domain not in realm_list.stdout }}"
+
+#- name: Remove stale keytab to force rejoin
+#  ansible.builtin.file:
+#    path: /etc/krb5.keytab
+#    state: absent
+#  become: true
+#  when: sssd_force_rejoin
+
+- name: Join AD domain
+  ansible.builtin.expect:
+    command: >
+      realm join --user={{ ad_join_user }} --computer-ou="{{ sssd.computerOU }}" {{ sssd.domain | upper }}
+    responses:
+      '(?i)Password for .*:': "{{ ad_join_pass }}"
+    timeout: 180
+    creates: /etc/krb5.keytab
+#  when: sssd_force_rejoin or rejoin_required
+  no_log: false
+  notify: restart sssd
+  become: true

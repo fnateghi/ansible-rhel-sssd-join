@@ -1,0 +1,6 @@
+# Managed by Ansible – Do not edit manually
+
+# Admins: full sudo access
+{% for group in sssd.groups_admins | default([]) %}
+%{{ group }} ALL=(ALL) NOPASSWD: ALL
+{% endfor %}

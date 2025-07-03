@@ -1,0 +1,43 @@
+# templates/krb5.conf.j2
+{{ ansible_managed | comment(decoration='# ') }}
+[libdefaults]
+  default_realm = {{ sssd.domain | upper }}
+  dns_lookup_realm = false
+  dns_lookup_kdc = true
+  ticket_lifetime = 24h
+  renew_lifetime = 7d
+  forwardable = true
+  proxiable = true
+  rdns = false
+
+{% if krb5_libdefaults is defined %}
+  {% for l in krb5_libdefaults %}
+  {{ l }}
+  {% endfor %}
+{% endif %}
+
+[realms]
+  {{ sssd.domain | upper }} = {
+    {% for kdc in sssd.kdc_servers %}
+    kdc = {{ kdc }}
+    {% endfor %}
+  }
+
+[domain_realm]
+  .{{ sssd.domain | lower }} = {{ sssd.domain | upper }}
+  {{ sssd.domain | lower }} = {{ sssd.domain | upper }}
+
+[logging]
+  default = FILE:/var/log/krb5libs.log
+  kdc = FILE:/var/log/krb5kdc.log
+  admin_server = FILE:/var/log/kadmind.log
+
+[appdefaults]
+  pam = {
+    debug = false
+    ticket_lifetime = 36000
+    renew_lifetime = 36000
+    forwardable = true
+    krb4_convert = false
+    proxiable = false
+  }

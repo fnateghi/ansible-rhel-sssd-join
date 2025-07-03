@@ -1,0 +1,35 @@
+---
+
+- name: Verify LDAPS trust with domain controller
+  ansible.builtin.command:
+    argv:
+      - openssl
+      - s_client
+      - -connect
+      - "{{ ad_dc_fqdn }}:636"
+      - -CApath
+      - /etc/ssl/certs
+  args:
+    stdin: "Q\n"
+  register: ldaps_test
+  changed_when: false
+  failed_when: ldaps_test.rc != 0
+
+- name: Show LDAPS trust result
+  ansible.builtin.debug:
+    var: ldaps_test.stdout
+
+- name: Verify domain user via SSSD
+  ansible.builtin.command:
+    cmd: id {{ ad_test_user }}
+  register: id_test
+  changed_when: false
+  failed_when: id_test.rc != 0
+
+- name: Show domain user lookup result
+  ansible.builtin.debug:
+    var: id_test.stdout
+
+- name: Print summary
+  ansible.builtin.debug:
+    msg: "✅ AD domain join and trust successfully verified on {{ inventory_hostname }}"

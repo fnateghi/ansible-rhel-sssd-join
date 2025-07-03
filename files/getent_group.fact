@@ -1,0 +1,6 @@
+#! /bin/bash
+
+echo "{"
+getent group | sed 's/\(.*\):x:/"\1" = "/g; s/:.*/", /g;s/ = / : /g'
+echo "\"xxxxxxxx\" : \"yyyyyyy\""
+echo "}"

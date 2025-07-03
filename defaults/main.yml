@@ -1,0 +1,40 @@
+#SPDX-License-Identifier: MIT-0
+---
+# defaults/main.yml
+# Default variables for AD integration on Rocky Linux.
+sssd:
+  debuglevel: 0x0780
+  domain:
+  kdc_servers:
+# Dfault OU where the Servers joined. Redefine it in Groups or Hosts if you want them in a different OU.
+  computerOU: "OU=Linux,OU=Server,DC=your,DC=domain,DC=test"
+  groups_admins:
+    - your_AD_Security_Group
+  cache_credentials: 'true'
+  account_cache_expiration: 2
+  offline_credentials_expiration: 2
+  entry_cache_timeout: 14400
+# Set to true to force a rejoin of the domain.
+sssd_force_rejoin: true
+# Optional: if you need to specify the computer account OU in full LDAP DN format.
+host_sssd_sudo_files: []
+host_sssd_groups_sudo: []
+ad_join_user:
+ad_join_pass:
+krb5_libdefaults: []
+
+sssd_packages:
+  - sssd
+  - sssd-ad
+  - sssd-tools
+  - realmd
+  - adcli
+  - krb5-workstation
+  - samba-common-tools
+  - oddjob
+  - oddjob-mkhomedir
+  - python3-pexpect
+  - authselect
+
+ad_dc_fqdn: "your_local_domain"
+ad_test_user: "your_user_whith_join_rights"

@@ -1,0 +1,13 @@
+#! /bin/bash
+
+echo "{"
+declare sep=""
+sss_override group-find | while read line; do
+	dgroup=${line%%@*}
+	line=${line#*:}
+	localname=${line%:*}
+	localgid=${line#*:*}
+	echo -en "$sep\"${dgroup,,}\" : {\"domaingroup\" : \"${dgroup,,}\", \"localname\" : \"${localname,,}\", \"gid\": \"$localgid\" }"
+	[ -z "$sep" ] && sep=",\n"
+done
+echo "}"
