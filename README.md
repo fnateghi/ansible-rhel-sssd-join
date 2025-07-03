@@ -66,7 +66,6 @@ sssd:
 # Optional: if you need to specify the computer account OU in full LDAP DN format.
 host_sssd_sudo_files: []
 host_sssd_groups_sudo: []
-# Secure credentials for joining the domain. Provide these via Ansible Vault or extra-vars. Decryption pass --> KeePass
 ad_join_user: 
 ad_join_pass: 
 krb5_libdefaults: []
