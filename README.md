@@ -62,7 +62,7 @@ sssd:
   offline_credentials_expiration: 2
   entry_cache_timeout: 14400
 # Set to true to force a rejoin of the domain.
-sssd_force_rejoin: true
+# sssd_force_rejoin: true
 # Optional: if you need to specify the computer account OU in full LDAP DN format.
 host_sssd_sudo_files: []
 host_sssd_groups_sudo: []
